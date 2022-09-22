@@ -45,15 +45,18 @@ where
         zip(&self.shape, &other.shape).all(|(a, w)| a == w)
     }
 
+    #[inline]
     pub fn rank(&self) -> usize {
         self.shape.len()
     }
 
     #[allow(unused)]
+    #[inline]
     pub fn shape(&self) -> &[usize] {
         &self.shape
     }
 
+    #[inline]
     pub fn raw_data(&self) -> &[T] {
         &self.data
     }
@@ -167,13 +170,6 @@ where
         //         }
         //     }
         // }
-    }
-
-    pub fn cast<U>(self) -> GenericArray<U>
-    where
-        U: Copy + Debug + From<T>,
-    {
-        self.generic_map(Into::into)
     }
 }
 
