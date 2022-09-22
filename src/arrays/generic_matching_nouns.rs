@@ -1,6 +1,6 @@
-use anyhow::Result;
 use crate::arrays::array_or_atom::ArrayOrAtom;
 use crate::arrays::generic_array::GenericArray;
+use anyhow::Result;
 use std::fmt::Debug;
 
 pub enum GenericMatchingNouns<T>
