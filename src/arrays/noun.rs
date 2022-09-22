@@ -3,6 +3,7 @@ use crate::arrays::array_or_atom::ArrayOrAtom;
 use crate::arrays::atom::Atom;
 use crate::arrays::generic_array::GenericArray;
 use crate::arrays::matching_nouns::MatchingNouns;
+use crate::arrays::promote::Promote;
 use crate::arrays::{DecimalElt, IntegerElt};
 use anyhow::anyhow;
 use std::fmt::Debug;
@@ -122,24 +123,24 @@ impl Noun {
             (N::Array(Arr::Decimal(a)), N::Array(Arr::Decimal(w))) => Ok(MN::Decimal(ArrArr(a, w))),
             // Boolean left
             (N::Array(Arr::Boolean(a)), N::Array(Arr::Integer(w))) => {
-                Ok(MN::Integer(ArrArr(a.cast(), w)))
+                Ok(MN::Integer(ArrArr(a.promote(), w)))
             }
             (N::Array(Arr::Boolean(a)), N::Array(Arr::Decimal(w))) => {
-                Ok(MN::Decimal(ArrArr(a.cast::<IntegerElt>().cast(), w)))
+                Ok(MN::Decimal(ArrArr(a.promote(), w)))
             }
             // Integer left
             (N::Array(Arr::Integer(a)), N::Array(Arr::Boolean(w))) => {
-                Ok(MN::Integer(ArrArr(a, w.cast())))
+                Ok(MN::Integer(ArrArr(a, w.promote())))
             }
             (N::Array(Arr::Integer(a)), N::Array(Arr::Decimal(w))) => {
-                Ok(MN::Decimal(ArrArr(a.cast(), w)))
+                Ok(MN::Decimal(ArrArr(a.promote(), w)))
             }
             // Decimal left
             (N::Array(Arr::Decimal(a)), N::Array(Arr::Boolean(w))) => {
-                Ok(MN::Decimal(ArrArr(a, w.cast::<IntegerElt>().cast())))
+                Ok(MN::Decimal(ArrArr(a, w.promote())))
             }
             (N::Array(Arr::Decimal(a)), N::Array(Arr::Integer(w))) => {
-                Ok(MN::Decimal(ArrArr(a, w.cast())))
+                Ok(MN::Decimal(ArrArr(a, w.promote())))
             }
 
             // Array - Atom
@@ -149,24 +150,24 @@ impl Noun {
             (N::Array(Arr::Decimal(a)), N::Atom(At::Decimal(w))) => Ok(MN::Decimal(ArrAt(a, w))),
             // Boolean left
             (N::Array(Arr::Boolean(a)), N::Atom(At::Integer(w))) => {
-                Ok(MN::Integer(ArrAt(a.cast(), w)))
+                Ok(MN::Integer(ArrAt(a.promote(), w)))
             }
             (N::Array(Arr::Boolean(a)), N::Atom(At::Decimal(w))) => {
-                Ok(MN::Decimal(ArrAt(a.cast::<IntegerElt>().cast(), w)))
+                Ok(MN::Decimal(ArrAt(a.promote(), w)))
             }
             // Integer left
             (N::Array(Arr::Integer(a)), N::Atom(At::Boolean(w))) => {
-                Ok(MN::Integer(ArrAt(a, w as IntegerElt)))
+                Ok(MN::Integer(ArrAt(a, w.promote())))
             }
             (N::Array(Arr::Integer(a)), N::Atom(At::Decimal(w))) => {
-                Ok(MN::Decimal(ArrAt(a.cast(), w)))
+                Ok(MN::Decimal(ArrAt(a.promote(), w)))
             }
             // Decimal left
             (N::Array(Arr::Decimal(a)), N::Atom(At::Boolean(w))) => {
-                Ok(MN::Decimal(ArrAt(a, w as IntegerElt as DecimalElt)))
+                Ok(MN::Decimal(ArrAt(a, w.promote())))
             }
             (N::Array(Arr::Decimal(a)), N::Atom(At::Integer(w))) => {
-                Ok(MN::Decimal(ArrAt(a, w as DecimalElt)))
+                Ok(MN::Decimal(ArrAt(a, w.promote())))
             }
 
             // Atom - Array
@@ -176,24 +177,24 @@ impl Noun {
             (N::Atom(At::Decimal(a)), N::Array(Arr::Decimal(w))) => Ok(MN::Decimal(AtArr(a, w))),
             // Boolean left
             (N::Atom(At::Boolean(a)), N::Array(Arr::Integer(w))) => {
-                Ok(MN::Integer(AtArr(a as IntegerElt, w)))
+                Ok(MN::Integer(AtArr(a.promote(), w)))
             }
             (N::Atom(At::Boolean(a)), N::Array(Arr::Decimal(w))) => {
-                Ok(MN::Decimal(AtArr(a as IntegerElt as DecimalElt, w)))
+                Ok(MN::Decimal(AtArr(a.promote(), w)))
             }
             // Integer left
             (N::Atom(At::Integer(a)), N::Array(Arr::Boolean(w))) => {
-                Ok(MN::Integer(AtArr(a, w.cast())))
+                Ok(MN::Integer(AtArr(a, w.promote())))
             }
             (N::Atom(At::Integer(a)), N::Array(Arr::Decimal(w))) => {
-                Ok(MN::Decimal(AtArr(a as DecimalElt, w)))
+                Ok(MN::Decimal(AtArr(a.promote(), w)))
             }
             // Decimal left
             (N::Atom(At::Decimal(a)), N::Array(Arr::Boolean(w))) => {
-                Ok(MN::Decimal(AtArr(a, w.cast::<IntegerElt>().cast())))
+                Ok(MN::Decimal(AtArr(a, w.promote())))
             }
             (N::Atom(At::Decimal(a)), N::Array(Arr::Integer(w))) => {
-                Ok(MN::Decimal(AtArr(a, w.cast())))
+                Ok(MN::Decimal(AtArr(a, w.promote())))
             }
 
             // Atom - Atom
@@ -203,24 +204,24 @@ impl Noun {
             (N::Atom(At::Decimal(a)), N::Atom(At::Decimal(w))) => Ok(MN::Decimal(AtAt(a, w))),
             // Boolean left
             (N::Atom(At::Boolean(a)), N::Atom(At::Integer(w))) => {
-                Ok(MN::Integer(AtAt(a as IntegerElt, w)))
+                Ok(MN::Integer(AtAt(a.promote(), w)))
             }
             (N::Atom(At::Boolean(a)), N::Atom(At::Decimal(w))) => {
-                Ok(MN::Decimal(AtAt(a as IntegerElt as DecimalElt, w)))
+                Ok(MN::Decimal(AtAt(a.promote(), w)))
             }
             // Integer left
             (N::Atom(At::Integer(a)), N::Atom(At::Boolean(w))) => {
-                Ok(MN::Integer(AtAt(a, w as IntegerElt)))
+                Ok(MN::Integer(AtAt(a, w.promote())))
             }
             (N::Atom(At::Integer(a)), N::Atom(At::Decimal(w))) => {
-                Ok(MN::Decimal(AtAt(a as DecimalElt, w)))
+                Ok(MN::Decimal(AtAt(a.promote(), w)))
             }
             // Decimal left
             (N::Atom(At::Decimal(a)), N::Atom(At::Boolean(w))) => {
-                Ok(MN::Decimal(AtAt(a, w as IntegerElt as DecimalElt)))
+                Ok(MN::Decimal(AtAt(a, w.promote())))
             }
             (N::Atom(At::Decimal(a)), N::Atom(At::Integer(w))) => {
-                Ok(MN::Decimal(AtAt(a, w as DecimalElt)))
+                Ok(MN::Decimal(AtAt(a, w.promote())))
             }
             #[allow(unreachable_patterns)]
             (a, w) => Err(anyhow!(
