@@ -28,9 +28,9 @@ impl Noun {
         use Noun as N;
         match self {
             N::Array(w) => AoA::Array(match w {
-                Arr::Boolean(w) => w.generic_map(b),
-                Arr::Integer(w) => w.generic_map(i),
-                Arr::Decimal(w) => w.generic_map(d),
+                Arr::Boolean(w) => w.map(b),
+                Arr::Integer(w) => w.map(i),
+                Arr::Decimal(w) => w.map(d),
             }),
             N::Atom(w) => AoA::Atom(match w {
                 At::Boolean(w) => b(w),

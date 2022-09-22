@@ -61,7 +61,7 @@ where
         &self.data
     }
 
-    pub fn generic_map<F, U>(self, f: F) -> GenericArray<U>
+    pub fn map<F, U>(self, f: F) -> GenericArray<U>
     where
         F: Fn(T) -> U,
         U: Copy + Debug,
@@ -72,7 +72,7 @@ where
         }
     }
 
-    pub(crate) fn generic_atom_map_right<F, U, V>(self, w: U, f: F) -> GenericArray<V>
+    pub(crate) fn atom_map_right<F, U, V>(self, w: U, f: F) -> GenericArray<V>
     where
         F: Fn(T, U) -> V,
         U: Copy + Debug,
@@ -84,7 +84,7 @@ where
         }
     }
 
-    pub(crate) fn generic_atom_map_left<F, U, V>(self, a: U, f: F) -> GenericArray<V>
+    pub(crate) fn atom_map_left<F, U, V>(self, a: U, f: F) -> GenericArray<V>
     where
         F: Fn(U, T) -> V,
         U: Copy + Debug,
@@ -96,7 +96,7 @@ where
         }
     }
 
-    pub(crate) fn generic_agreement_map<F, U, V>(
+    pub(crate) fn agreement_map<F, U, V>(
         self,
         other: GenericArray<U>,
         f: F,

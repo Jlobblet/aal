@@ -40,9 +40,9 @@ where
     {
         use GenericMatchingNouns::*;
         Ok(match self {
-            ArrArr(a, w) => ArrayOrAtom::Array(a.generic_agreement_map(w, f)?),
-            ArrAt(a, w) => ArrayOrAtom::Array(a.generic_atom_map_right(w, f)),
-            AtArr(a, w) => ArrayOrAtom::Array(w.generic_atom_map_left(a, f)),
+            ArrArr(a, w) => ArrayOrAtom::Array(a.agreement_map(w, f)?),
+            ArrAt(a, w) => ArrayOrAtom::Array(a.atom_map_right(w, f)),
+            AtArr(a, w) => ArrayOrAtom::Array(w.atom_map_left(a, f)),
             AtAt(a, w) => ArrayOrAtom::Atom(f(a, w)),
         })
     }

@@ -36,7 +36,7 @@ where
 {
     #[inline]
     fn promote(self) -> GenericArray<U> {
-        self.generic_map(Promote::promote)
+        self.map(Promote::promote)
     }
 }
 
