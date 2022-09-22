@@ -1,8 +1,8 @@
-use std::cmp::Ordering;
 use anyhow::{anyhow, Context, Result};
 use itertools::Itertools;
 use num_traits::{abs, Signed};
 use phf::phf_map;
+use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::io::{stdin, stdout, Write};
@@ -322,16 +322,16 @@ where
 
         let (shape, data) = match self.rank().cmp(&other.rank()) {
             Ordering::Less => todo!(),
-            Ordering::Equal => {
-                (self.shape.clone(), odometer(&self.shape).map(|index| f(self.get(&index).unwrap(), other.get(&index).unwrap())).collect_vec())
-            }
+            Ordering::Equal => (
+                self.shape.clone(),
+                odometer(&self.shape)
+                    .map(|index| f(self.get(&index).unwrap(), other.get(&index).unwrap()))
+                    .collect_vec(),
+            ),
             Ordering::Greater => todo!(),
         };
 
-        Some(GenericArray {
-            shape,
-            data,
-        })
+        Some(GenericArray { shape, data })
 
         // let (mut primary, secondary) = if swap { (self, other) } else { (other, self) };
         //
