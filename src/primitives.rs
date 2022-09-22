@@ -2,11 +2,20 @@ use crate::array::Noun;
 use phf::phf_map;
 
 mod monads {
-    use crate::array::Noun;
-    use anyhow::Result;
+    use crate::array::{Array, Atom, GenericArray, Noun};
+    use anyhow::{anyhow, Result};
 
-    pub(crate) fn same(w: Noun) -> Result<Noun> {
+    pub fn same(w: Noun) -> Result<Noun> {
         Ok(w)
+    }
+
+    pub fn iota(w: Noun) -> Result<Noun> {
+        let shape = match w {
+            Noun::Atom(Atom::Integer(w)) => vec![w],
+            Noun::Array(Array::Integer(w)) if w.rank() == 1 => w.raw_data().to_vec(),
+            _ => return Err(anyhow!("Incompatible argument: must be an atom or rank-1 integer array"))
+        };
+        Ok(Noun::Array(Array::Integer(GenericArray::iota(&shape))))
     }
 }
 
@@ -15,21 +24,22 @@ type MonadFn = fn(Noun) -> anyhow::Result<Noun>;
 pub static MONADS: phf::Map<&'static str, MonadFn> = phf_map! {
     "]" => monads::same,
     "[" => monads::same,
+    "i." => monads::iota,
 };
 
 mod dyads {
     use anyhow::{Context, Result};
     use crate::array::{IntegerElt, Noun};
 
-    pub(crate) fn same_w(_: Noun, w: Noun) -> Result<Noun> {
+    pub fn same_w(_: Noun, w: Noun) -> Result<Noun> {
         Ok(w)
     }
 
-    pub(crate) fn same_a(a: Noun, _: Noun) -> Result<Noun> {
+    pub fn same_a(a: Noun, _: Noun) -> Result<Noun> {
         Ok(a)
     }
 
-    pub(crate) fn add(a: Noun, w: Noun) -> Result<Noun> {
+    pub fn add(a: Noun, w: Noun) -> Result<Noun> {
         use crate::array::Array as Arr;
         use crate::array::ArrayOrAtom as AoA;
         use crate::array::Atom as At;

@@ -90,6 +90,10 @@ where
         self.shape.len()
     }
 
+    pub fn shape(&self) -> &[usize] { &self.shape }
+
+    pub fn raw_data(&self) -> &[T] { &self.data }
+
     fn generic_map<F, U>(self, f: F) -> GenericArray<U>
     where
         F: Fn(T) -> U,
@@ -239,12 +243,12 @@ where
     }
 }
 
-impl GenericArray<isize> {
-    pub fn iota(shape: &[usize]) -> Self {
+impl GenericArray<IntegerElt> {
+    pub fn iota(shape: &[IntegerElt]) -> Self {
         GenericArray {
-            shape: shape.to_vec(),
-            data: (0..shape.iter().product::<usize>())
-                .map(|w| w as isize)
+            shape: shape.iter().map(|&w| w as usize).collect(),
+            data: (0..shape.iter().product::<IntegerElt>())
+                .map(|w| w as IntegerElt)
                 .collect(),
         }
     }
@@ -312,7 +316,7 @@ impl<T> GenericMatchingNouns<T>
 where
     T: Copy + Debug,
 {
-    pub(crate) fn dyad<F, U>(self, f: F) -> Option<ArrayOrAtom<U>>
+    pub fn dyad<F, U>(self, f: F) -> Option<ArrayOrAtom<U>>
     where
         F: Fn(T, T) -> U,
         U: Copy + Debug,
@@ -334,7 +338,7 @@ pub enum MatchingNouns {
 }
 
 impl Noun {
-    pub(crate) fn try_promote_pair(a: Noun, w: Noun) -> Option<MatchingNouns> {
+    pub fn try_promote_pair(a: Noun, w: Noun) -> Option<MatchingNouns> {
         use Array as Arr;
         use Atom as At;
         use GenericMatchingNouns::*;
