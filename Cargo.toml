@@ -10,3 +10,4 @@ anyhow = "1.0.57"
 itertools = "0.10.4"
 num = "0.4.0"
 num-traits = "0.2.15"
+phf = { version = "0.10", features = ["macros"] }
