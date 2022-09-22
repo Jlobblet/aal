@@ -1,8 +1,11 @@
-use crate::array::Noun;
+use crate::arrays::noun::Noun;
 use phf::phf_map;
 
 mod monads {
-    use crate::array::{Array, Atom, GenericArray, Noun};
+    use crate::arrays::array::Array;
+    use crate::arrays::atom::Atom;
+    use crate::arrays::generic_array::GenericArray;
+    use crate::arrays::noun::Noun;
     use anyhow::{anyhow, Result};
 
     pub fn same(w: Noun) -> Result<Noun> {
@@ -15,7 +18,7 @@ mod monads {
             Noun::Array(Array::Integer(w)) if w.rank() == 1 => w.raw_data().to_vec(),
             _ => {
                 return Err(anyhow!(
-                    "Incompatible argument: must be an atom or rank-1 integer array"
+                    "Incompatible argument: must be an atom or rank-1 integer arrays"
                 ))
             }
         };
@@ -32,7 +35,9 @@ pub static MONADS: phf::Map<&'static str, MonadFn> = phf_map! {
 };
 
 mod dyads {
-    use crate::array::{GenericMatchingNouns, IntegerElt, Noun};
+    use crate::arrays::generic_matching_nouns::GenericMatchingNouns;
+    use crate::arrays::noun::Noun;
+    use crate::arrays::IntegerElt;
     use anyhow::{Context, Result};
 
     pub fn same_w(_: Noun, w: Noun) -> Result<Noun> {
@@ -45,7 +50,7 @@ mod dyads {
 
     pub fn add(a: Noun, w: Noun) -> Result<Noun> {
         Noun::try_promote_pair(a, w)
-            .context("failed to promote")?
+            .context("in dyadic + add")?
             .dyad(
                 |a, w| a as IntegerElt + w as IntegerElt,
                 |a, w| a + w,
@@ -55,7 +60,7 @@ mod dyads {
 
     pub fn sub(a: Noun, w: Noun) -> Result<Noun> {
         Noun::try_promote_pair(a, w)
-            .context("failed to promote")?
+            .context("in dyadic - sub")?
             .dyad(
                 |a, w| a as IntegerElt - w as IntegerElt,
                 |a, w| a - w,
@@ -65,20 +70,20 @@ mod dyads {
 
     pub fn mul(a: Noun, w: Noun) -> Result<Noun> {
         Noun::try_promote_pair(a, w)
-            .context("failed to promote")?
+            .context("in dyadic * mul")?
             .dyad(|a, w| a && w, |a, w| a * w, |a, w| a * w)
     }
 
     pub fn and(a: Noun, w: Noun) -> Result<Noun> {
-        GenericMatchingNouns::from((a.to_boolean(), w.to_boolean()))
+        GenericMatchingNouns::from((a.into_boolean(), w.into_boolean()))
             .dyad(|a, w| a && w)
+            .context("in dyadic *. and")
             .map(Noun::from)
-            .context("huh")
     }
 
     pub fn eq(a: Noun, w: Noun) -> Result<Noun> {
         Noun::try_promote_pair(a, w)
-            .context("")?
+            .context("in dyadic = eq")?
             .dyad(|a, w| a == w, |a, w| a == w, |a, w| a == w)
     }
 }

@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-mod array;
+mod arrays;
 mod interpreter;
 mod lexer;
 mod primitives;

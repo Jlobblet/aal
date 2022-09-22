@@ -1,4 +1,8 @@
-use crate::array::{Array, Atom, GenericArray, IntegerElt, Noun};
+use crate::arrays::array::Array;
+use crate::arrays::atom::Atom;
+use crate::arrays::generic_array::GenericArray;
+use crate::arrays::noun::Noun;
+use crate::arrays::IntegerElt;
 use crate::lexer::{lex, Token};
 use crate::primitives::{DYADS, MONADS};
 use anyhow::Result;
@@ -6,6 +10,7 @@ use anyhow::{anyhow, Context};
 use std::collections::HashMap;
 use std::io::{stdin, stdout, Write};
 
+#[allow(unused)]
 #[derive(Debug, Clone)]
 pub enum Variable {
     Noun(Noun),
