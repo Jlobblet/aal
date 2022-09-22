@@ -1,11 +1,12 @@
-use std::fmt::Debug;
-use std::str::FromStr;
-use std::iter::zip;
-use std::cmp::Ordering;
-use num_traits::{abs, Signed};
-use std::ops::{Add, Neg, Sub};
-use itertools::Itertools;
+use anyhow::Result;
 use anyhow::{anyhow, Context};
+use itertools::Itertools;
+use num_traits::{abs, Signed};
+use std::cmp::Ordering;
+use std::fmt::Debug;
+use std::iter::zip;
+use std::ops::{Add, Neg, Sub};
+use std::str::FromStr;
 
 pub type IntegerElt = i32;
 pub type DecimalElt = f64;
@@ -90,9 +91,13 @@ where
         self.shape.len()
     }
 
-    pub fn shape(&self) -> &[usize] { &self.shape }
+    pub fn shape(&self) -> &[usize] {
+        &self.shape
+    }
 
-    pub fn raw_data(&self) -> &[T] { &self.data }
+    pub fn raw_data(&self) -> &[T] {
+        &self.data
+    }
 
     fn generic_map<F, U>(self, f: F) -> GenericArray<U>
     where
@@ -290,8 +295,66 @@ pub enum Atom {
 
 #[derive(Debug, Clone)]
 pub enum Noun {
-    Atom(Atom),
     Array(Array),
+    Atom(Atom),
+}
+
+impl Noun {
+    pub fn map<FB, FI, FD, V>(self, b: FB, i: FI, d: FD) -> ArrayOrAtom<V>
+    where
+        FB: Fn(bool) -> V,
+        FI: Fn(IntegerElt) -> V,
+        FD: Fn(DecimalElt) -> V,
+        V: Copy + Debug,
+    {
+        use Array as Arr;
+        use ArrayOrAtom as AoA;
+        use Atom as At;
+        use Noun as N;
+        match self {
+            N::Array(w) => AoA::Array(match w {
+                Arr::Boolean(w) => w.generic_map(b),
+                Arr::Integer(w) => w.generic_map(i),
+                Arr::Decimal(w) => w.generic_map(d),
+            }),
+            N::Atom(w) => AoA::Atom(match w {
+                At::Boolean(w) => b(w),
+                At::Integer(w) => i(w),
+                At::Decimal(w) => d(w),
+            }),
+        }
+    }
+
+    pub fn to_boolean(self) -> ArrayOrAtom<bool> {
+        self.map(|w| w, |w| w != 0, |w| w != 0.0)
+    }
+}
+
+impl From<ArrayOrAtom<bool>> for Noun {
+    fn from(w: ArrayOrAtom<bool>) -> Self {
+        match w {
+            ArrayOrAtom::Array(w) => Noun::Array(Array::Boolean(w)),
+            ArrayOrAtom::Atom(w) => Noun::Atom(Atom::Boolean(w)),
+        }
+    }
+}
+
+impl From<ArrayOrAtom<IntegerElt>> for Noun {
+    fn from(w: ArrayOrAtom<IntegerElt>) -> Self {
+        match w {
+            ArrayOrAtom::Array(w) => Noun::Array(Array::Integer(w)),
+            ArrayOrAtom::Atom(w) => Noun::Atom(Atom::Integer(w)),
+        }
+    }
+}
+
+impl From<ArrayOrAtom<DecimalElt>> for Noun {
+    fn from(w: ArrayOrAtom<DecimalElt>) -> Self {
+        match w {
+            ArrayOrAtom::Array(w) => Noun::Array(Array::Decimal(w)),
+            ArrayOrAtom::Atom(w) => Noun::Atom(Atom::Decimal(w)),
+        }
+    }
 }
 
 pub enum GenericMatchingNouns<T>
@@ -302,6 +365,22 @@ where
     ArrAt(GenericArray<T>, T),
     AtArr(T, GenericArray<T>),
     AtAt(T, T),
+}
+
+impl<T> From<(ArrayOrAtom<T>, ArrayOrAtom<T>)> for GenericMatchingNouns<T>
+where
+    T: Copy + Debug,
+{
+    fn from(aw: (ArrayOrAtom<T>, ArrayOrAtom<T>)) -> Self {
+        use ArrayOrAtom as AoA;
+        use GenericMatchingNouns::*;
+        match aw {
+            (AoA::Array(a), AoA::Array(w)) => ArrArr(a, w),
+            (AoA::Array(a), AoA::Atom(w)) => ArrAt(a, w),
+            (AoA::Atom(a), AoA::Array(w)) => AtArr(a, w),
+            (AoA::Atom(a), AoA::Atom(w)) => AtAt(a, w),
+        }
+    }
 }
 
 pub enum ArrayOrAtom<T>
@@ -335,6 +414,30 @@ pub enum MatchingNouns {
     Boolean(GenericMatchingNouns<bool>),
     Integer(GenericMatchingNouns<IntegerElt>),
     Decimal(GenericMatchingNouns<DecimalElt>),
+}
+
+impl MatchingNouns {
+    pub fn dyad<FB, OB, FI, OI, FD, OD>(self, b: FB, i: FI, d: FD) -> Result<Noun>
+    where
+        FB: Fn(bool, bool) -> OB,
+        FI: Fn(IntegerElt, IntegerElt) -> OI,
+        FD: Fn(DecimalElt, DecimalElt) -> OD,
+        OB: Copy + Debug,
+        OI: Copy + Debug,
+        OD: Copy + Debug,
+        Noun: From<ArrayOrAtom<OB>> + From<ArrayOrAtom<OD>> + From<ArrayOrAtom<OI>>,
+    {
+        use crate::array::Array as Arr;
+        use crate::array::ArrayOrAtom as AoA;
+        use crate::array::Atom as At;
+        use crate::array::MatchingNouns as MN;
+        use crate::array::Noun as N;
+        Ok(match self {
+            MN::Boolean(nouns) => nouns.dyad(b).context("dyad failure")?.into(),
+            MN::Integer(nouns) => nouns.dyad(i).context("dyad failure")?.into(),
+            MN::Decimal(nouns) => nouns.dyad(d).context("dyad failure")?.into(),
+        })
+    }
 }
 
 impl Noun {

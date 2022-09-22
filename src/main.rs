@@ -1,9 +1,9 @@
-use anyhow::{Result};
+use anyhow::Result;
 
+mod array;
+mod interpreter;
 mod lexer;
 mod primitives;
-mod interpreter;
-mod array;
 
 fn main() -> Result<()> {
     interpreter::repl()

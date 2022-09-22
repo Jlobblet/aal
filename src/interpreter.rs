@@ -1,10 +1,10 @@
-use anyhow::Result;
-use std::collections::HashMap;
-use std::io::{stdin, stdout, Write};
-use anyhow::{anyhow, Context};
+use crate::array::{Array, Atom, GenericArray, IntegerElt, Noun};
 use crate::lexer::{lex, Token};
 use crate::primitives::{DYADS, MONADS};
-use crate::array::{Array, Atom, GenericArray, IntegerElt, Noun};
+use anyhow::Result;
+use anyhow::{anyhow, Context};
+use std::collections::HashMap;
+use std::io::{stdin, stdout, Write};
 
 #[derive(Debug, Clone)]
 pub enum Variable {
@@ -82,5 +82,4 @@ pub fn repl() -> Result<()> {
             Err(e) => eprintln!("{e}"),
         }
     }
-
 }
