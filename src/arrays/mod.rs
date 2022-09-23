@@ -9,7 +9,7 @@ pub mod matching_nouns;
 pub mod noun;
 pub mod promote;
 
-pub type IntegerElt = i32;
+pub type IntegerElt = i64;
 pub type DecimalElt = f64;
 
 fn odometer(range: &[usize]) -> Box<dyn Iterator<Item = Vec<usize>>> {
