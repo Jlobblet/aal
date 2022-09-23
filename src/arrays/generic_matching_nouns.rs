@@ -3,6 +3,7 @@ use crate::arrays::generic_array::GenericArray;
 use anyhow::{Context, Result};
 use std::fmt::Debug;
 
+#[derive(Debug, Clone)]
 pub enum GenericMatchingNouns<T>
 where
     T: Copy + Debug,

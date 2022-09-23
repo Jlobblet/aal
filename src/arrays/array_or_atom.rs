@@ -1,6 +1,7 @@
 use crate::arrays::generic_array::GenericArray;
 use std::fmt::Debug;
 
+#[derive(Debug, Clone)]
 pub enum ArrayOrAtom<T>
 where
     T: Copy + Debug,

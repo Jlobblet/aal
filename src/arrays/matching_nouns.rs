@@ -4,6 +4,7 @@ use crate::arrays::noun::Noun;
 use crate::arrays::{DecimalElt, IntegerElt};
 use std::fmt::Debug;
 
+#[derive(Debug, Clone)]
 pub enum MatchingNouns {
     Boolean(GenericMatchingNouns<bool>),
     Integer(GenericMatchingNouns<IntegerElt>),

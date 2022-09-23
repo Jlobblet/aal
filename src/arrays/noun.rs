@@ -45,66 +45,37 @@ impl Noun {
     }
 }
 
-impl From<ArrayOrAtom<bool>> for Noun {
-    fn from(w: ArrayOrAtom<bool>) -> Self {
-        match w {
-            ArrayOrAtom::Array(w) => Noun::Array(Array::Boolean(w)),
-            ArrayOrAtom::Atom(w) => Noun::Atom(Atom::Boolean(w)),
-        }
-    }
-}
-
-impl From<ArrayOrAtom<IntegerElt>> for Noun {
-    fn from(w: ArrayOrAtom<IntegerElt>) -> Self {
+impl<T> From<ArrayOrAtom<T>> for Noun
+where
+    T: Copy + Debug,
+    Atom: From<T>,
+    Array: From<GenericArray<T>>,
+{
+    fn from(w: ArrayOrAtom<T>) -> Self {
         match w {
             ArrayOrAtom::Array(w) => Noun::Array(w.into()),
-            ArrayOrAtom::Atom(w) => Noun::Atom(Atom::Integer(w)),
+            ArrayOrAtom::Atom(w) => Noun::Atom(w.into()),
         }
     }
 }
 
-impl From<ArrayOrAtom<DecimalElt>> for Noun {
-    fn from(w: ArrayOrAtom<DecimalElt>) -> Self {
-        match w {
-            ArrayOrAtom::Array(w) => Noun::Array(Array::Decimal(w)),
-            ArrayOrAtom::Atom(w) => Noun::Atom(Atom::Decimal(w)),
-        }
+impl<T> From<GenericArray<T>> for Noun
+where
+    T: Copy + Debug,
+    Array: From<GenericArray<T>>,
+{
+    fn from(w: GenericArray<T>) -> Self {
+        Noun::Array(w.into())
     }
 }
 
-impl From<GenericArray<bool>> for Noun {
-    fn from(w: GenericArray<bool>) -> Self {
-        Noun::Array(Array::Boolean(w))
-    }
-}
-
-impl From<GenericArray<IntegerElt>> for Noun {
-    fn from(w: GenericArray<IntegerElt>) -> Self {
-        Noun::Array(Array::Integer(w))
-    }
-}
-
-impl From<GenericArray<DecimalElt>> for Noun {
-    fn from(w: GenericArray<DecimalElt>) -> Self {
-        Noun::Array(Array::Decimal(w))
-    }
-}
-
-impl From<bool> for Noun {
-    fn from(w: bool) -> Self {
-        Noun::Atom(Atom::Boolean(w))
-    }
-}
-
-impl From<IntegerElt> for Noun {
-    fn from(w: IntegerElt) -> Self {
-        Noun::Atom(Atom::Integer(w))
-    }
-}
-
-impl From<DecimalElt> for Noun {
-    fn from(w: DecimalElt) -> Self {
-        Noun::Atom(Atom::Decimal(w))
+impl<T> From<T> for Noun
+where
+    T: Copy + Debug,
+    Atom: From<T>,
+{
+    fn from(w: T) -> Self {
+        Noun::Atom(w.into())
     }
 }
 
