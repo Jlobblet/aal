@@ -33,12 +33,20 @@ pub fn interpret(mut csl: Vec<Token>, env: &mut HashMap<String, Variable>) -> Re
                 if let Some(Token::Number(_) | Token::Identifier(_)) = csl.last() {
                     match get_noun(env, csl.pop().unwrap()) {
                         Some(n) => {
-                            right = DYADS[&o](n, right)?;
+                            right = DYADS
+                                .get(&o)
+                                .with_context(|| anyhow!("Unknown dyad {}", &o))?(
+                                n, right
+                            )?;
                         }
                         None => return Err(anyhow!("Failed to retrieve noun for left operator")),
                     }
                 } else {
-                    right = MONADS[&o](right)?;
+                    right = MONADS
+                        .get(&o)
+                        .with_context(|| anyhow!("Unknown monad {}", &o))?(
+                        right
+                    )?;
                 }
             }
             t => return Err(anyhow!("Nonsensical token {t:?}")),
