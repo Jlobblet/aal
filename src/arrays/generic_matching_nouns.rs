@@ -40,7 +40,9 @@ where
     {
         use GenericMatchingNouns::*;
         Ok(match self {
-            ArrArr(a, w) => ArrayOrAtom::Array(a.agreement_map(w, f).context("Arrays did not agree")?),
+            ArrArr(a, w) => {
+                ArrayOrAtom::Array(a.agreement_map(w, f).context("Arrays did not agree")?)
+            }
             ArrAt(a, w) => ArrayOrAtom::Array(a.atom_map_right(w, f)),
             AtArr(a, w) => ArrayOrAtom::Array(w.atom_map_left(a, f)),
             AtAt(a, w) => ArrayOrAtom::Atom(f(a, w)),

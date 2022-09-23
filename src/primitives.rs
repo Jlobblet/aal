@@ -37,9 +37,9 @@ pub static MONADS: phf::Map<&'static str, MonadFn> = phf_map! {
 mod dyads {
     use crate::arrays::generic_matching_nouns::GenericMatchingNouns;
     use crate::arrays::noun::Noun;
+    use crate::arrays::promote::Promote;
     use crate::arrays::{DecimalElt, IntegerElt};
     use anyhow::{Context, Result};
-    use crate::arrays::promote::Promote;
 
     pub fn same_w(_: Noun, w: Noun) -> Result<Noun> {
         Ok(w)
@@ -79,9 +79,15 @@ mod dyads {
         Noun::try_promote_pair(a, w)
             .context("in dyadic % div")?
             .dyad(
-                |a, w| <bool as Promote<DecimalElt>>::promote(a) / <bool as Promote<DecimalElt>>::promote(w),
-                |a, w| <IntegerElt as Promote<DecimalElt>>::promote(a) / <IntegerElt as Promote<DecimalElt>>::promote(w),
-                |a, w| a / w
+                |a, w| {
+                    <bool as Promote<DecimalElt>>::promote(a)
+                        / <bool as Promote<DecimalElt>>::promote(w)
+                },
+                |a, w| {
+                    <IntegerElt as Promote<DecimalElt>>::promote(a)
+                        / <IntegerElt as Promote<DecimalElt>>::promote(w)
+                },
+                |a, w| a / w,
             )
     }
 
