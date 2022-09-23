@@ -82,9 +82,9 @@ pub fn repl() -> Result<()> {
             Ok(csl) => match interpret(csl, &mut env) {
                 Ok(None) => (),
                 Ok(Some(n)) => println!("{n:?}"),
-                Err(e) => eprintln!("{e}"),
+                Err(e) => eprintln!("{e:?}"),
             },
-            Err(e) => eprintln!("{e}"),
+            Err(e) => eprintln!("{e:?}"),
         }
     }
 }

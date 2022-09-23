@@ -1,6 +1,6 @@
 use crate::arrays::array_or_atom::ArrayOrAtom;
 use crate::arrays::generic_array::GenericArray;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::fmt::Debug;
 
 pub enum GenericMatchingNouns<T>
@@ -40,7 +40,7 @@ where
     {
         use GenericMatchingNouns::*;
         Ok(match self {
-            ArrArr(a, w) => ArrayOrAtom::Array(a.agreement_map(w, f)?),
+            ArrArr(a, w) => ArrayOrAtom::Array(a.agreement_map(w, f).context("Arrays did not agree")?),
             ArrAt(a, w) => ArrayOrAtom::Array(a.atom_map_right(w, f)),
             AtArr(a, w) => ArrayOrAtom::Array(w.atom_map_left(a, f)),
             AtAt(a, w) => ArrayOrAtom::Atom(f(a, w)),
