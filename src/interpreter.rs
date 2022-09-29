@@ -22,6 +22,8 @@ pub fn interpret(mut csl: Vec<Token>, env: &mut HashMap<String, Variable>) -> Re
         return Ok(None);
     }
 
+    if let Some(Token::Eol) = csl.last() { csl.pop(); }
+
     // For now, we will only consider the case where the rightmost value is a numeric noun
     // Safe to unwrap because we know csl is nonempty
     let mut right = get_noun(env, csl.pop().unwrap()).with_context(|| "No rightmost noun")?;
@@ -31,6 +33,7 @@ pub fn interpret(mut csl: Vec<Token>, env: &mut HashMap<String, Variable>) -> Re
             Token::Operator(o) => {
                 // Look ahead to see if we're in the monadic or dyadic case
                 if let Some(Token::Number(_) | Token::Identifier(_)) = csl.last() {
+                    // We can unwrap here because we know the next thing is a noun
                     match get_noun(env, csl.pop().unwrap()) {
                         Some(n) => {
                             right = DYADS
