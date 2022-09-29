@@ -22,7 +22,9 @@ pub fn interpret(mut csl: Vec<Token>, env: &mut HashMap<String, Variable>) -> Re
         return Ok(None);
     }
 
-    if let Some(Token::Eol) = csl.last() { csl.pop(); }
+    if let Some(Token::Eol) = csl.last() {
+        csl.pop();
+    }
 
     // For now, we will only consider the case where the rightmost value is a numeric noun
     // Safe to unwrap because we know csl is nonempty

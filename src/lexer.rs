@@ -42,11 +42,11 @@ enum LexerState {
 
 impl fsm_lexer::StateTransitionTable<InputClass> for LexerState {
     fn transition(self, class: Option<InputClass>) -> (Self, fsm_lexer::LexerAction) {
-        use InputClass::*;
         use fsm_lexer::LexerAction::*;
+        use InputClass as IC;
+        use InputClass::*;
         use LexerState as LS;
         use LexerState::*;
-        use InputClass as IC;
 
         match self {
             Initial | LS::Whitespace => match class {
@@ -152,9 +152,11 @@ impl fsm_lexer::Token<LexerState> for Token {
         use LexerState::*;
         use Token::*;
         match (state, last) {
-            (Num, Some(Number(v))) => { v.push(s); None },
+            (Num, Some(Number(v))) => {
+                v.push(s);
+                None
+            }
             _ => Some(Self::emit(s, state)),
-
         }
     }
 }
