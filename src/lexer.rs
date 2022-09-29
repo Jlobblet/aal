@@ -113,17 +113,6 @@ impl fsm_lexer::StateTransitionTable<InputClass> for LexerState {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq)]
-enum LexerAction {
-    NoAction,
-    Advance,
-    EmitAndAdvance,
-    EmitAndReset,
-    AppendAndAdvance,
-    AppendAndReset,
-    Stop,
-}
-
 #[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     Identifier(String),
