@@ -116,60 +116,36 @@ where
 
         let (shape, data) = match self.rank().cmp(&other.rank()) {
             Ordering::Less => {
-                return Err(anyhow!(
-                    "Leading-axis agreement is not currently implemented"
-                ))
+                let d = other.data.len() / self.data.len();
+                let data = other
+                    .data
+                    .into_iter()
+                    .enumerate()
+                    .map(|(i, w)| f(self.data[i / d], w))
+                    .collect();
+                (other.shape, data)
             }
             Ordering::Equal => (
                 self.shape.clone(),
-                arrays::odometer(&self.shape)
-                    .map(|index| f(self.get(&index).unwrap(), other.get(&index).unwrap()))
-                    .collect_vec(),
+                self.data
+                    .into_iter()
+                    .zip(other.data.into_iter())
+                    .map(|(a, w)| f(a, w))
+                    .collect(),
             ),
             Ordering::Greater => {
-                return Err(anyhow!(
-                    "Leading-axis agreement is not currently implemented"
-                ))
+                let d = self.data.len() / other.data.len();
+                let data = self
+                    .data
+                    .into_iter()
+                    .enumerate()
+                    .map(|(i, a)| f(a, other.data[i / d]))
+                    .collect();
+                (self.shape, data)
             }
         };
 
         Ok(GenericArray { shape, data })
-
-        // let (mut primary, secondary) = if swap { (self, other) } else { (other, self) };
-        //
-        // if primary.rank() == secondary.rank() {
-        //     for full_index in odometer(&primary.shape) {
-        //         let a = primary
-        //             .get_mut(&full_index)
-        //             .expect("Odometer-generated index should be in range");
-        //         let w = secondary
-        //             .get(&full_index)
-        //             .expect("Odometer-generated index should be in range");
-        //         if swap {
-        //             *a = f(*a, w);
-        //         } else {
-        //             *a = f(w, *a);
-        //         }
-        //     }
-        // } else {
-        //     for leading_index in odometer(&secondary.shape) {
-        //         for trailing_index in odometer(&primary.shape[secondary.rank()..]) {
-        //             let mut full_index = leading_index.clone();
-        //             full_index.extend_from_slice(&trailing_index);
-        //             let a = primary
-        //                 .get_mut(&full_index)
-        //                 .expect("Odometer-generated index should be in range");
-        //             let w = secondary
-        //                 .get(&leading_index)
-        //                 .expect("Odometer-generated index should be in range");
-        //             if swap {
-        //                 *a = f(*a, w);
-        //             } else {
-        //                 *a = f(w, *a);
-        //             }
-        //         }
-        //     }
-        // }
     }
 }
 
