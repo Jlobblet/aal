@@ -160,6 +160,7 @@ impl fsm_lexer::Tokeniser<LexerState> for Token {
 }
 
 pub fn lex(input: &str) -> anyhow::Result<Vec<Token>> {
-    let lexer: fsm_lexer::Lexer<InputClass, LexerState, Token> = fsm_lexer::Lexer::new(LexerState::Initial);
+    let lexer: fsm_lexer::Lexer<InputClass, LexerState, Token> =
+        fsm_lexer::Lexer::new(LexerState::Initial);
     lexer.lex(input).context("Failed to lex")
 }
