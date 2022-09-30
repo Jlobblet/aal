@@ -22,10 +22,7 @@ where
     pub fn new<C: Into<Vec<T>>>(c: C) -> Self {
         let data = c.into();
         let shape = vec![data.len()];
-        Self {
-            shape,
-            data,
-        }
+        Self { shape, data }
     }
 
     fn get_index(&self, index: &[usize]) -> Option<usize> {
