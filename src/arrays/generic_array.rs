@@ -3,7 +3,7 @@ use crate::arrays::IntegerElt;
 use anyhow::{anyhow, Context};
 use itertools::Itertools;
 use std::cmp::Ordering;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::iter::zip;
 use std::str::FromStr;
 
@@ -184,19 +184,21 @@ impl GenericArray<IntegerElt> {
     }
 }
 
-impl<T> TryFrom<&[String]> for GenericArray<T>
+impl<T, S> TryFrom<&[S]> for GenericArray<T>
 where
     T: Copy + Debug + FromStr,
     <T as FromStr>::Err: 'static + std::error::Error + Send + Sync,
+    S: AsRef<str> + Display,
 {
     type Error = anyhow::Error;
 
-    fn try_from(value: &[String]) -> anyhow::Result<Self> {
+    fn try_from(value: &[S]) -> anyhow::Result<Self> {
         let shape = vec![value.len()];
         let data = value
             .iter()
             .map(|w| {
-                w.parse()
+                w.as_ref()
+                    .parse()
                     .with_context(|| anyhow!("Failed to parse {w} as a number."))
             })
             .collect::<anyhow::Result<_>>()?;

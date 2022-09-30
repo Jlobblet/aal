@@ -12,8 +12,10 @@ enum InputClass {
     LF,
 }
 
-impl fsm_lexer::InputClass for InputClass {
-    fn classify(c: char) -> Self {
+impl fsm_lexer::InputClassifier for InputClass {
+    type InputClass = Self;
+
+    fn classify(c: char) -> Self::InputClass {
         use InputClass::*;
         match c {
             ' ' | '\t' => Whitespace,
@@ -41,14 +43,19 @@ enum LexerState {
 }
 
 impl fsm_lexer::StateTransitionTable<InputClass> for LexerState {
-    fn transition(self, class: Option<InputClass>) -> (Self, fsm_lexer::LexerAction) {
+    type LexerState = Self;
+
+    fn transition(
+        state: Self::LexerState,
+        class: Option<InputClass>,
+    ) -> (Self, fsm_lexer::LexerAction) {
         use fsm_lexer::LexerAction::*;
         use InputClass as IC;
         use InputClass::*;
         use LexerState as LS;
         use LexerState::*;
 
-        match self {
+        match state {
             Initial | LS::Whitespace => match class {
                 Some(IC::Other | Dot | Colon) => (LS::Other, Advance),
                 Some(IC::Whitespace) => (LS::Whitespace, NoAction),
@@ -122,8 +129,10 @@ pub enum Token {
     Eol,
 }
 
-impl fsm_lexer::Token<LexerState> for Token {
-    fn emit(s: String, state: LexerState) -> Self {
+impl fsm_lexer::Tokeniser<LexerState> for Token {
+    type Token = Self;
+
+    fn emit(s: &str, state: LexerState) -> Self::Token {
         use LexerState::*;
         use Token::*;
         let token_fn = match state {
@@ -134,15 +143,15 @@ impl fsm_lexer::Token<LexerState> for Token {
             LF => |_| Eol,
             _ => unreachable!("Attempted to create a token from nonsensical state"),
         };
-        token_fn(s)
+        token_fn(s.to_owned())
     }
 
-    fn append(s: String, state: LexerState, last: Option<&mut Self>) -> Option<Self> {
+    fn append(s: &str, state: LexerState, last: Option<&mut Self::Token>) -> Option<Self::Token> {
         use LexerState::*;
         use Token::*;
         match (state, last) {
             (Num, Some(Number(v))) => {
-                v.push(s);
+                v.push(s.to_owned());
                 None
             }
             _ => Some(Self::emit(s, state)),
@@ -151,6 +160,6 @@ impl fsm_lexer::Token<LexerState> for Token {
 }
 
 pub fn lex(input: &str) -> anyhow::Result<Vec<Token>> {
-    let lexer = fsm_lexer::Lexer::new(LexerState::Initial);
+    let lexer: fsm_lexer::Lexer<InputClass, LexerState, Token> = fsm_lexer::Lexer::new(LexerState::Initial);
     lexer.lex(input).context("Failed to lex")
 }
