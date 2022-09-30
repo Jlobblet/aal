@@ -6,7 +6,9 @@ mod monads {
     use crate::arrays::atom::Atom;
     use crate::arrays::generic_array::GenericArray;
     use crate::arrays::noun::Noun;
-    use anyhow::{anyhow, Result};
+    use crate::arrays::IntegerElt;
+    use anyhow::{anyhow, Context, Result};
+    use itertools::Itertools;
 
     pub fn same(w: Noun) -> Result<Noun> {
         Ok(w)
@@ -24,6 +26,23 @@ mod monads {
         };
         Ok(Noun::Array(Array::Integer(GenericArray::iota(&shape))))
     }
+
+    pub fn shape_of(w: Noun) -> Result<Noun> {
+        w.shape()
+            .map(|s| {
+                Noun::from(Array::from(GenericArray::new(
+                    s.iter().map(|&u| u as IntegerElt).collect_vec(),
+                )))
+            })
+            .with_context(|| anyhow!("atoms have no shape"))
+    }
+
+    pub fn count(w: Noun) -> Result<Noun> {
+        w.shape()
+            .and_then(|s| s.first())
+            .map(|u| (*u as IntegerElt).into())
+            .with_context(|| anyhow!("atoms have no count"))
+    }
 }
 
 type MonadFn = fn(Noun) -> anyhow::Result<Noun>;
@@ -32,14 +51,18 @@ pub static MONADS: phf::Map<&'static str, MonadFn> = phf_map! {
     "]" => monads::same,
     "[" => monads::same,
     "i." => monads::iota,
+    "$" => monads::shape_of,
+    "#" => monads::count,
 };
 
 mod dyads {
+    use crate::arrays::generic_array::GenericArray;
     use crate::arrays::generic_matching_nouns::GenericMatchingNouns;
     use crate::arrays::noun::Noun;
     use crate::arrays::promote::Promote;
     use crate::arrays::{DecimalElt, IntegerElt};
-    use anyhow::{Context, Result};
+    use anyhow::{anyhow, Context, Result};
+    use std::path::Display;
 
     pub fn same_w(_: Noun, w: Noun) -> Result<Noun> {
         Ok(w)

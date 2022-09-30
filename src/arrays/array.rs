@@ -25,3 +25,23 @@ impl From<GenericArray<DecimalElt>> for Array {
         Self::Decimal(w)
     }
 }
+
+impl Array {
+    pub fn shape(&self) -> &[usize] {
+        use Array::*;
+        match self {
+            Boolean(b) => b.shape(),
+            Integer(i) => i.shape(),
+            Decimal(d) => d.shape(),
+        }
+    }
+
+    pub fn rank(&self) -> usize {
+        use Array::*;
+        match self {
+            Boolean(b) => b.rank(),
+            Integer(i) => i.rank(),
+            Decimal(d) => d.rank(),
+        }
+    }
+}

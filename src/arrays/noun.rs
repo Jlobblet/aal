@@ -43,6 +43,22 @@ impl Noun {
     pub fn into_boolean(self) -> ArrayOrAtom<bool> {
         self.map(|w| w, |w| w != 0, |w| w != 0.0)
     }
+
+    pub fn shape(&self) -> Option<&[usize]> {
+        use Noun::*;
+        match self {
+            Array(a) => Some(a.shape()),
+            _ => None,
+        }
+    }
+
+    pub fn rank(&self) -> Option<usize> {
+        use Noun::*;
+        match self {
+            Array(a) => Some(a.rank()),
+            _ => None,
+        }
+    }
 }
 
 impl<T> From<ArrayOrAtom<T>> for Noun
@@ -76,6 +92,12 @@ where
 {
     fn from(w: T) -> Self {
         Noun::Atom(w.into())
+    }
+}
+
+impl From<Array> for Noun {
+    fn from(a: Array) -> Self {
+        Self::Array(a)
     }
 }
 
